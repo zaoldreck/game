@@ -22,6 +22,79 @@ defmodule GameWeb.GameLive do
 
   def render(assigns) do
     ~L"""
+    <style>
+      .game-container {
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 20px;
+        text-align: center;
+        font-family: Arial, sans-serif;
+      }
+      .join-container {
+        margin: 20px auto;
+        padding: 20px;
+        border: 2px solid #ccc;
+        border-radius: 8px;
+        width: 300px;
+      }
+      .lobby {
+        margin: 20px auto;
+        padding: 20px;
+        border: 2px solid #ccc;
+        border-radius: 8px;
+        display: inline-block;
+      }
+      .ready-button {
+        background-color: #007bff;
+        color: white;
+        border: none;
+        padding: 10px 20px;
+        border-radius: 4px;
+        font-size: 16px;
+        cursor: pointer;
+        margin-top: 10px;
+      }
+      .ready-button:hover {
+        background-color: #0056b3;
+      }
+      .game-board-container {
+        margin: 20px auto;
+        width: 500px;
+      }
+      .game-board {
+        margin: 0 auto;
+        background-color: #f0f0f0;
+        position: relative;
+      }
+      .player {
+        position: absolute;
+        width: 10px;
+        height: 10px;
+      }
+      .player-name {
+        font-size: 10px;
+        color: #000;
+      }
+      .controls button {
+        margin: 5px;
+        padding: 8px 12px;
+        font-size: 14px;
+        cursor: pointer;
+      }
+      .game-over {
+        margin-top: 10px;
+        color: red;
+        font-weight: bold;
+      }
+      .announcements {
+        margin-top: 20px;
+        text-align: left;
+        max-width: 500px;
+        margin-left: auto;
+        margin-right: auto;
+      }
+    </style>
+
     <div class="game-container">
       <%= if not @joined do %>
         <div class="join-container">
@@ -43,17 +116,17 @@ defmodule GameWeb.GameLive do
                 </li>
               <% end %>
             </ul>
-            <button phx-click="ready">Ready</button>
+            <button class="ready-button" phx-click="ready">Ready</button>
             <p>Waiting for all players to click Ready...</p>
           </div>
         <% else %>
           <div phx-window-keydown="key_move" tabindex="0" class="game-board-container">
             <h2>Game Started – Good Luck, <%= @name %>!</h2>
-            <div id="game-board" class="game-board" style="position: relative; width: 500px; height: 500px; border: 1px solid #000;">
+            <div id="game-board" class="game-board" style="width: 500px; height: 500px; border: 1px solid #000;">
               <%= for {_id, player} <- @players do %>
                 <% {x, y} = player.pos %>
-                <div class="player" style="position: absolute; left: <%= x * 5 %>px; top: <%= y * 5 %>px; width: 10px; height: 10px; background-color: <%= player.color %>;">
-                  <span class="player-name" style="font-size: 10px; color: #000;"><%= player.name %></span>
+                <div class="player" style="left: <%= x * 5 %>px; top: <%= y * 5 %>px; background-color: <%= player.color %>;">
+                  <span class="player-name"><%= player.name %></span>
                 </div>
               <% end %>
               <%= if @key do %>
@@ -146,7 +219,6 @@ defmodule GameWeb.GameLive do
         _ -> nil
       end
 
-    # Use the "&&" operator so that if direction is nil, it short-circuits.
     if direction && Map.has_key?(socket.assigns.players, socket.assigns.player_id) do
       player = socket.assigns.players[socket.assigns.player_id]
       Game.GameServer.move_player(socket.assigns.player_id, move(player.pos, direction))
